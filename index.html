@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gasolineras BP</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    #map {
+      height: 70vh;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- NAV -->
+  <nav class="bg-[#00704A] shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="#" class="flex-shrink-0 text-[#FFC72C] text-xl font-extrabold tracking-wider">
+          ⛽ Gasolineras <span class="text-white font-bold ml-1">BP</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- FILTROS -->
+      <div class="bg-gray-100 p-4 rounded-lg shadow-lg mb-6 flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+        <div id="controls-panel" class="flex flex-wrap items-center space-x-3 space-y-2 md:space-y-0 justify-end w-full md:w-auto">
+
+          <!-- 🔽 NUEVO: Filtro de provincias -->
+          <select id="province-filter" title="Filtrar por provincia"
+            class="py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-[#00704A] focus:border-[#00704A] sm:text-sm text-gray-900 font-medium flex-grow md:flex-grow-0">
+            <option value="">Todas las provincias</option>
+          </select>
+
+          <!-- Filtro de combustible -->
+          <select id="fuel-filter" title="Filtrar por tipo de combustible"
+            class="py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-[#00704A] focus:border-[#00704A] sm:text-sm text-gray-900 font-medium flex-grow md:flex-grow-0">
+            <option value="">Todos los combustibles</option>
+          </select>
+
+          <!-- Filtro “Abiertas ahora” -->
+          <label for="open-now-filter" class="flex items-center text-sm font-medium text-gray-700 whitespace-nowrap">
+            <input type="checkbox" id="open-now-filter"
+              class="form-checkbox h-4 w-4 text-[#00704A] rounded focus:ring-[#00704A] border-gray-300 mr-1">
+            Abiertas Ahora
+          </label>
+
+          <!-- Buscar -->
+          <input type="text" id="search-input" placeholder="🔍 Buscar por Nombre o Dirección"
+            title="Buscar gasolinera por marca o calle"
+            class="py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-[#00704A] focus:border-[#00704A] sm:text-sm text-gray-900 font-normal w-full md:w-56">
+        </div>
+      </div>
+
+      <!-- MAPA -->
+      <div id="map" class="mb-8"></div>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="js/datos.js"></script>
+</body>
+</html>
