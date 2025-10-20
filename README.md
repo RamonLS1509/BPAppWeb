@@ -70,14 +70,6 @@ BPApp/
 
 ---
 
-## 🧠 Futuras mejoras
-
-- [ ] Integrar librerías de visualización (por ejemplo, Leaflet.js o Chart.js).  
-- [ ] Añadir soporte para datos en tiempo real (API o WebSockets).  
-- [ ] Implementar un sistema de búsqueda avanzada.  
-- [ ] Agregar pruebas unitarias (Jest).  
-
----
 
 ## 🤝 Contribuciones
 
