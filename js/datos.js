@@ -1,10 +1,8 @@
-// mapa.js (versión corregida y más defensiva)
-
 let map;
 let allMarkers = [];
 
 const CACHE_KEY = 'carburantes_api_cache';
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 horas en ms
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 horas
 
 const COMBUSTIBLES = [
   { key: 'Precio Gasolina 95 E5', label: 'G95 E5' },
@@ -39,7 +37,6 @@ function isGasolineraOpen(horario) {
 
     if (isNaN(start) || isNaN(end)) return false;
 
-    // Horario que pasa de medianoche
     if (end < start) {
       return current >= start || current < end;
     } else {
@@ -52,109 +49,78 @@ function isGasolineraOpen(horario) {
 }
 
 // -------------------------------------------
-// Fetch + caché (localStorage) con defensa
+// Fetch + caché (localStorage)
 // -------------------------------------------
 async function fetchEstaciones() {
   try {
-    // Intentamos leer cache
     const cachedRaw = localStorage.getItem(CACHE_KEY);
     if (cachedRaw) {
       try {
         const cached = JSON.parse(cachedRaw);
         const age = Date.now() - (cached.timestamp || 0);
         if (age < CACHE_DURATION && cached.data && Array.isArray(cached.data.ListaEESSPrecio)) {
-          console.log('✅ Cargando datos desde caché local (menos de 24h).');
-          processData(cached.data);
-          return;
+          console.log('✅ Cache vigente, no es necesario nuevo fetch.');
+          return; // Ya se cargó antes desde el cache
         } else {
-          console.log('🕒 Caché expirada o inválida. Se eliminará y se solicitará nuevo fetch.');
+          console.log('🕒 Caché expirada o inválida, se solicitará nueva.');
           localStorage.removeItem(CACHE_KEY);
         }
-      } catch (err) {
-        console.warn('⚠️ Error parseando caché local, se eliminará. Detalle:', err);
+      } catch {
         localStorage.removeItem(CACHE_KEY);
       }
     }
 
-    // Realizamos fetch con comprobación de status
     console.log('🌐 Solicitando datos a la API del Ministerio...');
-    const resp = await fetch('https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres', {
-      method: 'GET',
-      cache: 'no-store'
-    });
+    const resp = await fetch(
+      'https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres',
+      { method: 'GET', cache: 'no-store' }
+    );
 
-    if (!resp.ok) {
-      const txt = await resp.text().catch(() => '');
-      throw new Error('Respuesta no OK: ' + resp.status + ' ' + resp.statusText + ' — ' + txt.slice(0, 200));
-    }
+    if (!resp.ok) throw new Error(`Respuesta no OK: ${resp.status}`);
 
-    // parse JSON de forma segura
-    let data;
-    try {
-      data = await resp.json();
-    } catch (err) {
-      const txt = await resp.text().catch(() => '');
-      throw new Error('JSON parse error: ' + err.message + ' ; body: ' + txt.slice(0, 400));
-    }
+    const data = await resp.json();
+    if (!data || !Array.isArray(data.ListaEESSPrecio))
+      throw new Error('Estructura inesperada de la API');
 
-    if (!data || !Array.isArray(data.ListaEESSPrecio)) {
-      throw new Error('Estructura inesperada de la API: falta ListaEESSPrecio');
-    }
-
-    // Guardar en caché completa (timestamp + data)
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data }));
-      console.log('💾 Datos guardados en localStorage (cache).');
-    } catch (err) {
-      console.warn('⚠️ No se pudo guardar la cache en localStorage:', err);
-    }
-
+    // Guardar cache
+    const filtered = data.ListaEESSPrecio.filter(e => e['Rótulo'] && e['Rótulo'].toUpperCase().includes('BP'));
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: { ListaEESSPrecio: filtered } }));
+    console.log('💾 Datos guardados en localStorage.');
     processData(data);
 
   } catch (error) {
-    console.error('❌ Error al obtener los datos de la API:', error);
-
-    // Mostrar popup claro en el mapa (si existe)
+    console.error('❌ Error al obtener datos de la API:', error);
     if (map && typeof L !== 'undefined') {
       L.popup()
         .setLatLng([40.416775, -3.703790])
-        .setContent('❌ Error al cargar los datos de la API. Revisa consola para más info.')
+        .setContent('❌ Error al cargar los datos de la API.')
         .openOn(map);
     }
 
-    // Como fallback, si hay cache aunque expirado, intenta usarla (mejor que nada)
+    // Intentar usar cache vieja como fallback
     try {
       const fallback = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
-      if (fallback && fallback.data && Array.isArray(fallback.data.ListaEESSPrecio)) {
-        console.warn('⚠️ Usando caché como fallback (aunque pudiera estar expirada).');
+      if (fallback?.data?.ListaEESSPrecio) {
+        console.warn('⚠️ Usando caché antigua como fallback.');
         processData(fallback.data);
-        return;
       }
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) { }
   }
 }
 
 // ----------------------------
-// Procesar datos y dejarlos "limpios"
+// Procesar datos
 // ----------------------------
 function processData(data) {
   try {
     const rawList = Array.isArray(data.ListaEESSPrecio) ? data.ListaEESSPrecio : [];
     const estacionesBP = rawList
-      .filter(e => e && e['Rótulo'] && typeof e['Rótulo'] === 'string' && e['Rótulo'].toUpperCase().includes('BP'))
+      .filter(e => e?.['Rótulo']?.toUpperCase().includes('BP'))
       .map(e => {
-        // defensivo: claves lat/long pueden faltar o venir con coma
-        const safeLat = (e.Latitud && typeof e.Latitud === 'string') ? e.Latitud.replace(',', '.').trim() : '';
+        const safeLat = e.Latitud?.replace(',', '.').trim() || '';
         const longKey = e['Longitud (WGS84)'] ? 'Longitud (WGS84)' : (e['Longitud'] ? 'Longitud' : null);
-        const safeLon = longKey && e[longKey] && typeof e[longKey] === 'string' ? e[longKey].replace(',', '.').trim() : '';
-
-        return {
-          ...e,
-          Latitud: safeLat,
-          'Longitud (WGS84)': safeLon
-        };
+        const safeLon = longKey ? e[longKey]?.replace(',', '.').trim() : '';
+        return { ...e, Latitud: safeLat, 'Longitud (WGS84)': safeLon };
       });
 
     window.estacionesData = estacionesBP;
@@ -168,43 +134,29 @@ function processData(data) {
 }
 
 // ----------------------------
-// Filtrado y render
+// Filtros y renderizado
 // ----------------------------
 function filterAndRenderStations() {
   try {
-    const fuelKeyEl = document.getElementById('fuel-filter');
-    const openNowEl = document.getElementById('open-now-filter');
-    const searchEl = document.getElementById('search-input');
-    const provinceEl = document.getElementById('province-filter');
-
-    const fuelKey = fuelKeyEl ? fuelKeyEl.value : '';
-    const openNow = openNowEl ? openNowEl.checked : false;
-    const searchText = searchEl ? (searchEl.value || '').toLowerCase() : '';
-    const selectedProvince = provinceEl ? provinceEl.value : '';
+    const fuelKey = document.getElementById('fuel-filter')?.value || '';
+    const openNow = document.getElementById('open-now-filter')?.checked || false;
+    const searchText = document.getElementById('search-input')?.value.toLowerCase() || '';
+    const selectedProvince = document.getElementById('province-filter')?.value || '';
 
     const estacionesData = Array.isArray(window.estacionesData) ? window.estacionesData : [];
 
     const filtered = estacionesData.filter(estacion => {
       if (!estacion) return false;
-
-      // combustible
-      if (fuelKey && (!estacion[fuelKey] || estacion[fuelKey] === '')) return false;
-
-      // abiertas ahora
+      if (fuelKey && !estacion[fuelKey]) return false;
       if (openNow && !isGasolineraOpen(estacion.Horario)) return false;
+      if (selectedProvince && estacion.Provincia !== selectedProvince) return false;
 
-      // provincia
-      if (selectedProvince && (!estacion.Provincia || estacion.Provincia !== selectedProvince)) return false;
-
-      // busqueda texto
-      if (searchText) {
-        const rotulo = (estacion['Rótulo'] || '').toLowerCase();
-        const direccion = (estacion['Dirección'] || '').toLowerCase();
-        if (!rotulo.includes(searchText) && !direccion.includes(searchText)) return false;
-      }
-
-      return true;
+      const rotulo = (estacion['Rótulo'] || '').toLowerCase();
+      const direccion = (estacion['Dirección'] || '').toLowerCase();
+      return !searchText || rotulo.includes(searchText) || direccion.includes(searchText);
     });
+
+    
 
     renderMarkers(filtered);
   } catch (err) {
@@ -213,92 +165,75 @@ function filterAndRenderStations() {
 }
 
 // ----------------------------
-// Dibujar marcadores
+// Dibujar marcadores en el mapa
 // ----------------------------
 function renderMarkers(data) {
-  try {
-    // limpiar anteriores
-    allMarkers.forEach(m => {
-      try { map.removeLayer(m); } catch (e) { /* ignore */ }
-    });
-    allMarkers = [];
+  allMarkers.forEach(m => { try { map.removeLayer(m); } catch { } });
+  allMarkers = [];
 
-    let bounds = L.latLngBounds();
-    let markersAdded = 0;
+  const bounds = L.latLngBounds();
+  let added = 0;
 
-    data.forEach(estacion => {
-      const lat = parseFloat(estacion.Latitud);
-      const lon = parseFloat(estacion['Longitud (WGS84)']);
+  data.forEach(estacion => {
+    const lat = parseFloat(estacion.Latitud);
+    const lon = parseFloat(estacion['Longitud (WGS84)']);
+    if (isNaN(lat) || isNaN(lon)) return;
 
-      if (isNaN(lat) || isNaN(lon)) return;
+    const abierta = isGasolineraOpen(estacion.Horario);
+    const status = abierta ? '🟢 ABIERTA AHORA' : '🔴 CERRADA AHORA';
 
-      const horario = estacion.Horario || 'Horario no disponible';
-      const abierta = isGasolineraOpen(horario);
-      const status = abierta ? '🟢 ABIERTA AHORA' : '🔴 CERRADA AHORA';
-
-      let preciosHtml = '';
-      COMBUSTIBLES.forEach(p => {
-        const precioRaw = estacion[p.key];
-        const precio = (typeof precioRaw === 'string') ? precioRaw.replace(',', '.').trim() : '';
-        if (precio) {
-          preciosHtml += `<div style="font-size:0.9em;"><strong>${p.label}:</strong> ${precio} €/L</div>`;
-        }
-      });
-
-      const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
-      const popupHtml = `
-        <div style="min-width:180px;">
-          <strong style="color:#00704A;font-size:1.05em">${estacion['Rótulo'] || 'Estación'}</strong>
-          <div style="font-size:0.9em;margin-bottom:6px;">${estacion['Dirección'] || ''}</div>
-          <div style="margin-bottom:6px;"><strong>${status}</strong></div>
-          <hr>
-          ${preciosHtml || '<div style="color:#b91c1c;">Precios no disponibles</div>'}
-          <details style="margin-top:6px;font-size:0.9em;"><summary style="font-weight:bold;color:#555;">Horario</summary><div style="padding-left:8px;">${(horario || '').replace(/\n/g,'<br>')}</div></details>
-          <a href="${directionsUrl}" target="_blank" style="display:inline-block;margin-top:8px;padding:6px 10px;background:#00704A;color:white;text-decoration:none;border-radius:6px;">📍 Cómo llegar</a>
-        </div>
-      `;
-
-      const marker = L.marker([lat, lon]).addTo(map);
-      marker.bindPopup(popupHtml);
-      allMarkers.push(marker);
-      bounds.extend([lat, lon]);
-      markersAdded++;
+    let preciosHtml = '';
+    COMBUSTIBLES.forEach(p => {
+      const precio = estacion[p.key]?.replace(',', '.').trim();
+      if (precio) preciosHtml += `<div><strong>${p.label}:</strong> ${precio} €/L</div>`;
     });
 
-    if (markersAdded > 0) {
-      try { map.fitBounds(bounds, { padding: [50, 50] }); } catch(e) { console.warn('fitBounds fallo:', e); }
-    } else {
-      L.popup().setLatLng([40.416775, -3.703790]).setContent('🚫 No se encontraron gasolineras BP con el filtro aplicado.').openOn(map);
-    }
-  } catch (err) {
-    console.error('renderMarkers error:', err);
-  }
+    const popupHtml = `
+      <div style="min-width:180px;">
+        <strong style="color:#00704A;font-size:1.05em">${estacion['Rótulo'] || 'Estación'}</strong>
+        <div style="font-size:0.9em;margin-bottom:6px;">${estacion['Dirección'] || ''}</div>
+        <div style="margin-bottom:6px;"><strong>${status}</strong></div>
+        <hr>
+        ${preciosHtml || '<div style="color:#b91c1c;">Precios no disponibles</div>'}
+        <details style="margin-top:6px;font-size:0.9em;">
+          <summary style="font-weight:bold;color:#555;">Horario</summary>
+          <div style="padding-left:8px;">${(estacion.Horario || '').replace(/\n/g, '<br>')}</div>
+        </details>
+        <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}"
+           target="_blank"
+           style="display:inline-block;margin-top:8px;padding:6px 10px;background:#00704A;color:white;text-decoration:none;border-radius:6px;">
+           📍 Cómo llegar
+        </a>
+      </div>`;
+
+    const marker = L.marker([lat, lon]).addTo(map);
+    marker.bindPopup(popupHtml);
+    allMarkers.push(marker);
+    bounds.extend([lat, lon]);
+    added++;
+  });
+
+  if (added > 0) map.fitBounds(bounds, { padding: [50, 50] });
+  else L.popup().setLatLng([40.416775, -3.703790]).setContent('🚫 No se encontraron gasolineras.').openOn(map);
 }
 
 // ----------------------------
-// Cargar provincias en select
+// Provincias
 // ----------------------------
 function loadProvinces(estaciones) {
-  try {
-    const provinceSelect = document.getElementById('province-filter');
-    if (!provinceSelect) return;
-
-    provinceSelect.innerHTML = '<option value="">Todas las provincias</option>';
-    const provincias = [...new Set(estaciones.map(e => e.Provincia).filter(Boolean))].sort();
-
-    provincias.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p;
-      opt.textContent = p;
-      provinceSelect.appendChild(opt);
-    });
-  } catch (err) {
-    console.error('loadProvinces error:', err);
-  }
+  const select = document.getElementById('province-filter');
+  if (!select) return;
+  select.innerHTML = '<option value="">Todas las provincias</option>';
+  [...new Set(estaciones.map(e => e.Provincia).filter(Boolean))].sort().forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    select.appendChild(opt);
+  });
 }
 
 // ----------------------------
-// Inicialización DOMContentLoaded
+// Inicialización rápida (con cache instantánea)
 // ----------------------------
 document.addEventListener('DOMContentLoaded', () => {
   try {
@@ -306,29 +241,44 @@ document.addEventListener('DOMContentLoaded', () => {
     map = L.map('map').setView([40.416775, -3.703790], 5);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    // Poblar select de combustibles
-    const fuelFilterSelect = document.getElementById('fuel-filter');
-    if (fuelFilterSelect) {
+    // Poblar select combustibles
+    const fuelSelect = document.getElementById('fuel-filter');
+    if (fuelSelect) {
       COMBUSTIBLES.forEach(p => {
-        const option = document.createElement('option');
-        option.value = p.key;
-        option.textContent = p.label;
-        fuelFilterSelect.appendChild(option);
+        const opt = document.createElement('option');
+        opt.value = p.key;
+        opt.textContent = p.label;
+        fuelSelect.appendChild(opt);
       });
-      fuelFilterSelect.addEventListener('change', filterAndRenderStations);
+      fuelSelect.addEventListener('change', filterAndRenderStations);
     }
 
-    const openNowEl = document.getElementById('open-now-filter');
-    if (openNowEl) openNowEl.addEventListener('change', filterAndRenderStations);
+    // Listeners de filtros
+    ['open-now-filter', 'search-input', 'province-filter'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener(id === 'search-input' ? 'input' : 'change', filterAndRenderStations);
+    });
 
-    const searchEl = document.getElementById('search-input');
-    if (searchEl) searchEl.addEventListener('input', filterAndRenderStations);
+    // ⚡ PRIMERA CARGA: usar cache instantáneamente si existe
+    const cachedRaw = localStorage.getItem(CACHE_KEY);
+    if (cachedRaw) {
+      try {
+        const cached = JSON.parse(cachedRaw);
+        const age = Date.now() - (cached.timestamp || 0);
+        if (age < CACHE_DURATION && cached.data?.ListaEESSPrecio) {
+          console.log('⚡ Cargando instantáneamente desde caché local.');
+          processData(cached.data);
+        } else {
+          localStorage.removeItem(CACHE_KEY);
+        }
+      } catch {
+        localStorage.removeItem(CACHE_KEY);
+      }
+    }
 
-    const provinceEl = document.getElementById('province-filter');
-    if (provinceEl) provinceEl.addEventListener('change', filterAndRenderStations);
-
-    // Llamamos al fetch (usa cache si existe)
+    // 🌐 Segundo paso: actualizar en segundo plano
     fetchEstaciones();
+
   } catch (err) {
     console.error('DOMContentLoaded init error:', err);
   }

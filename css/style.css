@@ -1,0 +1,50 @@
+/* Aseguramos que el mapa sea responsive y ocupe un buen espacio vertical */
+#map {
+  height: 70vh;
+  min-height: 400px;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  width: 100%;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Estilos base para el cuerpo y mejor accesibilidad */
+body {
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+}
+
+/* Estilo para los inputs/selects para un toque más moderno y accesible */
+.filter-control {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid #e5e7eb;
+}
+
+.filter-control:focus {
+  border-color: #00704A;
+  box-shadow: 0 0 0 4px rgba(0, 112, 74, 0.15);
+  background-color: #ffffff;
+}
+
+/* Cuando los filtros están ocultos */
+#filters-container.hidden {
+  max-height: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+/* Estilo para los checkbox modernos */
+.form-checkbox {
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.form-checkbox:checked {
+  border-color: #00704A;
+  background-color: #00704A;
+}
+
