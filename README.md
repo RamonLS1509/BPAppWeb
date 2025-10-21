@@ -1,25 +1,33 @@
-# 🌍 BPApp
+# ⛽ BPApp — Estaciones BP en España
 
-**BPApp** es una aplicación web enfocada en la visualización de datos y el manejo de filtros dinámicos mediante JavaScript.  
-El proyecto se compone de una interfaz moderna y eficiente que facilita la interacción con información visual (por ejemplo, mapas o dashboards).
+**BPApp** es una aplicación web moderna que te permite localizar estaciones de servicio **BP** en España, con datos actualizados en tiempo real sobre precios de carburantes, horarios y disponibilidad.  
 
----
-
-## 🧩 Descripción general
-
-La aplicación presenta un **mapa interactivo** y un conjunto de **filtros configurables** que permiten manipular y visualizar datos de manera dinámica.  
-Su diseño modular facilita la integración con APIs o fuentes externas de datos.
+Su diseño está optimizado para **dispositivos móviles**, con una interfaz minimalista, rápida y accesible.
 
 ---
 
-## 🛠️ Tecnologías utilizadas
+## 🧭 Características principales
 
-| Tecnología | Uso principal |
-|-------------|----------------|
-| **HTML5** | Estructura semántica de la aplicación |
-| **CSS3 (map.css, style.css)** | Estilos visuales y diseño responsivo |
-| **JavaScript (ES6+)** | Lógica de interacción, carga dinámica de datos y control de filtros |
-| **Fetch API / JSON (si aplica)** | Posible manejo de datos externos |
+- 🗺️ **Mapa interactivo** con Leaflet mostrando todas las estaciones BP.
+- ⚡ **Caché inteligente (24h)**: los datos se guardan en `localStorage` para cargar instantáneamente en visitas posteriores.
+- 🔍 **Filtros avanzados**: busca por nombre, provincia, tipo de combustible o estaciones abiertas actualmente.
+- 📱 **Diseño responsive 2025**: limpio, elegante y compatible con cualquier dispositivo.
+- 💚 **Donaciones por PayPal** integradas en el menú superior.
+- 👤 **Nueva página “Sobre mí”** con enlaces a GitHub y LinkedIn.
+- 🔄 **Animación de carga opcional**, mejorando la experiencia de usuario móvil.
+
+---
+
+## 🧩 Tecnologías utilizadas
+
+| Tecnología | Descripción |
+|-------------|--------------|
+| **HTML5 / TailwindCSS** | Diseño moderno y adaptable |
+| **Leaflet.js** | Visualización de mapas interactivos |
+| **JavaScript (ES6+)** | Lógica, filtros, y gestión de datos |
+| **Fetch API + LocalStorage** | Carga eficiente y almacenamiento local |
+| **PayPal** | Sistema de donaciones integrado |
+| **GitHub / LinkedIn** | Enlaces personales en la página “Sobre mí” |
 
 ---
 
@@ -28,16 +36,15 @@ Su diseño modular facilita la integración con APIs o fuentes externas de datos
 ```
 BPApp/
 │
-├── index.html              # Página principal
+├── index.html             # Página principal con mapa y filtros
+├── sobre-mi.html          # Página "Sobre mí" con perfil y enlaces
 │
 ├── css/
-│   ├── style.css           # Estilos generales
-│   └── map.css             # Estilos específicos del mapa
+│   ├── style.css          # Estilos generales
 │
 └── js/
-    ├── datos.js            # Datos o configuración base de la app
-    ├── filtrosToogle.js    # Lógica de activación/desactivación de filtros
-    └── loading.js          # Control del estado de carga
+    ├── datos.js           # Carga de datos y lógica de filtrado
+    ├── filtrosToogle.js   # Control de visibilidad de filtros
 ```
 
 ---
@@ -49,54 +56,66 @@ BPApp/
    git clone https://github.com/RamonLS1509/BPAppWeb.git
    ```
 
-2. **Abre el proyecto:**
-   - Ingresa al directorio:
-     ```bash
-     cd BPAppWeb
-     ```
-   - Abre `index.html` directamente en tu navegador  
-     o usa un servidor local (por ejemplo, con **Live Server** en VS Code).
+2. **Accede al proyecto:**
+   ```bash
+   cd BPAppWeb
+   ```
 
-3. **(Opcional)** Si los datos provienen de una API, asegúrate de tener acceso a ella antes de cargar la página.
+3. **Abre el proyecto:**
+   - Puedes abrir el archivo `index.html` directamente en tu navegador.
+   - O ejecutar un servidor local (por ejemplo con la extensión *Live Server* de VS Code).
 
----
-
-## 💡 Funcionalidades destacadas
-
-- **Carga visual progresiva:** manejo del estado `loading` mediante `loading.js`.  
-- **Gestión de filtros dinámicos:** activación y desactivación de filtros sin recargar la página.  
-- **Datos configurables:** `datos.js` centraliza la información para mantener un flujo limpio y estructurado.  
-- **Estilo adaptable:** uso de CSS modular (separación entre estilos generales y específicos del mapa).
+4. **Disfruta de una carga más rápida:**  
+   La primera carga guarda los datos de la API durante 24 horas.  
+   Las siguientes visitas se cargarán al instante desde la caché local.
 
 ---
 
+## 💚 Donaciones
+
+Si este proyecto te ha resultado útil, puedes **invitarme a un café ☕** y ayudarme a seguir mejorando:
+
+👉 [**Donar con PayPal**](https://paypal.me/ramonlopezsalmeron)
+
+Cada contribución, por pequeña que sea, me ayuda a mantener y optimizar esta aplicación gratuita. ¡Gracias por tu apoyo! 🙌
+
+---
+
+## 👤 Página “Sobre mí”
+
+La página [**sobre-mi.html**](./sobre-mi.html) incluye:
+- Mi presentación personal.  
+- Enlaces a **GitHub** y **LinkedIn**.  
+- Una invitación a colaborar o donar mediante PayPal.  
+- Diseño coherente con el resto del proyecto (verde BP + amarillo BP).  
+
+---
 
 ## 🤝 Contribuciones
 
-Las contribuciones son bienvenidas.
+¿Quieres mejorar el proyecto?  
+¡Perfecto! Sigue estos pasos:
 
-1. Realiza un **fork** del proyecto.  
-2. Crea una rama con tu mejora:
+1. Haz un **fork** del repositorio.  
+2. Crea una nueva rama:
    ```bash
    git checkout -b feature/nueva-funcionalidad
    ```
-3. Realiza tus cambios y asegúrate de que todo funciona.  
-4. Envía un **Pull Request** con una descripción detallada.
+3. Realiza tus cambios y pruébalos.  
+4. Envía un **Pull Request** con una descripción clara.
 
 ---
 
-## 📄 Licencia
+## 📜 Licencia
 
 Este proyecto está bajo la licencia **MIT**.  
-Consulta el archivo `LICENSE` para más detalles.
+Puedes usarlo libremente, siempre mencionando la autoría original.
 
 ---
 
 ## 📬 Contacto
 
-**Autor:** Ramón L. S.  
-**Repositorio:** [github.com/RamonLS1509/BPAppWeb](https://github.com/RamonLS1509/BPAppWeb)
-
----
-
-> _“Un proyecto bien estructurado es el primer paso hacia una aplicación escalable.”_
+**Autor:** Ramón López Salmerón  
+**GitHub:** [github.com/RamonLS1509](https://github.com/RamonLS1509)  
+**LinkedIn:** [linkedin.com/in/tuusuario](https://linkedin.com/in/tuusuario)  
+**PayPal:** [paypal.me/ramonlopezsalmeron](https://paypal.me/ramonlopezsalmeron)
