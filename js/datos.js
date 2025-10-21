@@ -59,10 +59,8 @@ async function fetchEstaciones() {
         const cached = JSON.parse(cachedRaw);
         const age = Date.now() - (cached.timestamp || 0);
         if (age < CACHE_DURATION && cached.data && Array.isArray(cached.data.ListaEESSPrecio)) {
-          console.log('✅ Cache vigente, no es necesario nuevo fetch.');
           return; // Ya se cargó antes desde el cache
         } else {
-          console.log('🕒 Caché expirada o inválida, se solicitará nueva.');
           localStorage.removeItem(CACHE_KEY);
         }
       } catch {
@@ -70,7 +68,6 @@ async function fetchEstaciones() {
       }
     }
 
-    console.log('🌐 Solicitando datos a la API del Ministerio...');
     const resp = await fetch(
       'https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres',
       { method: 'GET', cache: 'no-store' }
@@ -85,7 +82,6 @@ async function fetchEstaciones() {
     // Guardar cache
     const filtered = data.ListaEESSPrecio.filter(e => e['Rótulo'] && e['Rótulo'].toUpperCase().includes('BP'));
     localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: { ListaEESSPrecio: filtered } }));
-    console.log('💾 Datos guardados en localStorage.');
     processData(data);
 
   } catch (error) {
@@ -127,7 +123,6 @@ function processData(data) {
     loadProvinces(estacionesBP);
     filterAndRenderStations();
 
-    console.log('📍 Estaciones BP procesadas:', estacionesBP.length);
   } catch (err) {
     console.error('processData error:', err);
   }
@@ -266,7 +261,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const cached = JSON.parse(cachedRaw);
         const age = Date.now() - (cached.timestamp || 0);
         if (age < CACHE_DURATION && cached.data?.ListaEESSPrecio) {
-          console.log('⚡ Cargando instantáneamente desde caché local.');
           processData(cached.data);
         } else {
           localStorage.removeItem(CACHE_KEY);

@@ -18,31 +18,53 @@
 
 <body class="bg-gray-100">
   <!-- NAV - Ahora más prominente y pegadizo -->
-  <nav class="bg-bp-green/95 backdrop-blur-md shadow-xl sticky top-0 z-30 transition-all duration-300">
-  <div class="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between h-20">
-    
-    <!-- Logo / Nombre -->
-    <a href="index.html" class="flex items-center space-x-2 group">
-      <span class="text-white text-2xl font-extrabold tracking-wide">
-        ⛽ Estaciones <span class="text-bp-yellow">BP</span>
-      </span>
-    </a>
-
-    <!-- Enlaces a la derecha -->
-    <div class="flex items-center gap-4">
-      <!-- Enlace Sobre mí -->
-      <a href="sobre-mi.html"
-        class="text-white font-semibold hover:text-bp-yellow transition-colors duration-200">
-        Sobre mí
+<!-- NAVBAR MOBILE FIRST -->
+<nav class="bg-bp-green/95 backdrop-blur-md shadow-xl sticky top-0 z-30 transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-20">
+      
+      <!-- LOGO -->
+      <a href="index.html" class="flex items-center space-x-2 group">
+        <span class="text-white text-2xl font-extrabold tracking-wide">
+          ⛽ Estaciones <span class="text-bp-yellow">BP</span>
+        </span>
       </a>
 
-      <!-- Botón Donar -->
+      <!-- BOTÓN MENÚ (solo móvil) -->
+      <button id="menu-toggle" class="lg:hidden text-white hover:text-bp-yellow focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+             stroke="currentColor" class="w-7 h-7">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      <!-- ENLACES DESKTOP -->
+      <div class="hidden lg:flex items-center gap-5">
+        <a href="sobre-mi.html" class="text-white font-semibold hover:text-bp-yellow transition-colors">
+          Sobre mí
+        </a>
+        <a href="https://paypal.me/ramonlopezsalmeron" target="_blank" rel="noopener noreferrer"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-[#0070BA] hover:bg-[#003087] text-white font-semibold rounded-xl shadow transition-transform hover:scale-[1.02]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 38" class="w-5 h-5">
+            <path fill="#ffffff" d="M10.5 30L12 21h5.6c3.6 0 6.4-2.4 7-5.8.6-3.6-1.9-6.6-5.5-6.6H9L5 30h5.5z" />
+          </svg>
+          Donar
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENÚ MÓVIL -->
+  <div id="mobile-menu" class="hidden bg-bp-green/95 backdrop-blur-md border-t border-white/10 lg:hidden">
+    <div class="px-6 py-4 space-y-3 flex flex-col text-center">
+      <a href="sobre-mi.html" class="block text-white font-semibold hover:text-bp-yellow transition-colors">
+        Sobre mí
+      </a>
       <a href="https://paypal.me/ramonlopezsalmeron" target="_blank" rel="noopener noreferrer"
-        class="inline-flex items-center gap-2 px-4 py-2 bg-[#0070BA] hover:bg-[#003087] text-white font-semibold rounded-xl shadow transition-transform hover:scale-[1.02]">
-        <!-- Icono PayPal -->
+         class="inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#0070BA] hover:bg-[#003087] text-white font-semibold rounded-xl shadow transition-transform hover:scale-[1.02]">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 38" class="w-5 h-5">
-          <path fill="#ffffff"
-            d="M10.5 30L12 21h5.6c3.6 0 6.4-2.4 7-5.8.6-3.6-1.9-6.6-5.5-6.6H9L5 30h5.5z" />
+          <path fill="#ffffff" d="M10.5 30L12 21h5.6c3.6 0 6.4-2.4 7-5.8.6-3.6-1.9-6.6-5.5-6.6H9L5 30h5.5z" />
         </svg>
         Donar
       </a>
@@ -115,7 +137,14 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="js/datos.js"></script>
   <script src="js/filtrosToogle.js"></script>
-
+<script>
+  const menuToggle = document.getElementById('menu-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  
+  menuToggle.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+  });
+</script>
 </body>
 
 </html>
