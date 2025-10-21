@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sobre mí | Estaciones BP</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <!-- Fuente y Tailwind -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tus estilos externos al final -->
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Paleta personalizada -->
+  <style>
+    :root {
+      --bp-green: #00704A;
+      --bp-yellow: #FFC72C;
+    }
+    .bg-bp-green { background-color: var(--bp-green); }
+    .text-bp-green { color: var(--bp-green); }
+    .bg-bp-yellow { background-color: var(--bp-yellow); }
+    .text-bp-yellow { color: var(--bp-yellow); }
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+  <!-- NAVBAR -->
+  <nav class="bg-bp-green shadow-lg sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between h-20">
+      <a href="index.html" class="flex items-center space-x-2">
+        <span class="text-white text-2xl font-extrabold tracking-wide">
+          ⛽ Estaciones <span class="text-bp-yellow">BP</span>
+        </span>
+      </a>
+
+      <div class="flex items-center gap-4">
+        <a href="index.html" class="text-white font-semibold hover:text-bp-yellow transition-colors">Inicio</a>
+        <a href="https://paypal.me/ramonlopezsalmeron" target="_blank" rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-[#0070BA] hover:bg-[#003087] text-white font-semibold rounded-xl shadow transition-transform hover:scale-[1.02]">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 38" class="w-5 h-5">
+            <path fill="#ffffff" d="M10.5 30L12 21h5.6c3.6 0 6.4-2.4 7-5.8.6-3.6-1.9-6.6-5.5-6.6H9L5 30h5.5z" />
+          </svg>
+          Donar
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENIDO -->
+  <main class="max-w-4xl mx-auto mt-12 px-6 text-center">
+    <div class="bg-white shadow-2xl rounded-3xl p-10 border border-gray-100">
+      <!-- 🔗 IMÁGENES PERFIL -->
+      <div class="flex justify-center items-center gap-6 mb-6">
+        <!-- GitHub -->
+        <a href="https://github.com/RamonLS1509" target="_blank" rel="noopener noreferrer"
+           class="transition-transform hover:scale-105">
+          <img src="https://avatars.githubusercontent.com/u/000000?v=4" alt="Perfil de GitHub"
+               class="w-28 h-28 rounded-full shadow-md border-4 border-bp-green object-cover">
+        </a>
+        <!-- LinkedIn -->
+        <a href="https://www.linkedin.com/in/ram%C3%B3nl%C3%B3pezsalmer%C3%B3n/" target="_blank" rel="noopener noreferrer"
+           class="transition-transform hover:scale-105">
+          <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="Perfil de LinkedIn"
+               class="w-28 h-28 rounded-full shadow-md border-4 border-bp-yellow object-cover bg-white p-2">
+        </a>
+      </div>
+      <h1 class="text-3xl font-extrabold text-bp-green mb-2">Hola, soy Ramón López</h1>
+      <p class="text-gray-600 mb-8 text-lg leading-relaxed">
+        Soy desarrollador web con pasión por las interfaces limpias y útiles.  
+        Este proyecto de <strong>Estaciones BP</strong> nació para facilitar la búsqueda de gasolineras cercanas, 
+        optimizando velocidad, diseño y accesibilidad tanto en ordenador como en móvil.  
+        <br><br>
+        Si te ha sido útil este proyecto o quieres apoyarme para seguir mejorándolo,  
+        puedes <a href="https://paypal.me/ramonlopezsalmeron" target="_blank" rel="noopener noreferrer"
+        class="text-bp-green font-semibold hover:underline">invitarme a un café ☕ a través de PayPal</a>.  
+        ¡Tu apoyo ayuda a mantener este servicio gratuito y en constante mejora! 💚
+      </p>
+      <a href="index.html"
+         class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-bp-green hover:bg-bp-green/90 text-white font-bold rounded-xl shadow-md transition-transform hover:scale-[1.03]">
+        ← Volver al mapa
+      </a>
+    </div>
+    <p class="text-gray-500 text-sm mt-10">© 2025 Ramón López Salmerón. Todos los derechos reservados.</p>
+  </main>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="js/datos.js"></script>
+  <script src="js/filtrosToogle.js"></script>
+</body>
+</html>
